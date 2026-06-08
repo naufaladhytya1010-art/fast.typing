@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Typing Challenge</title>
+
+<style>
+body{
+    margin:0;
+    font-family:Arial,sans-serif;
+    background:#18181b;
+    color:white;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    min-height:100vh;
+}
+
+.screen{
+    display:none;
+    width:90%;
+    max-width:900px;
+    text-align:center;
+}
+
+.active{
+    display:block;
+}
+
+button{
+    padding:15px 30px;
+    margin:10px;
+    border:none;
+    border-radius:10px;
+    background:#3b82f6;
+    color:white;
+    cursor:pointer;
+    font-size:18px;
+}
+
+button:hover{
+    background:#2563eb;
+}
+
+#sentence{
+    font-size:28px;
+    line-height:1.8;
+    margin:30px 0;
+    text-align:left;
+    background:#27272a;
+    padding:20px;
+    border-radius:10px;
+}
+
+.correct{
+    color:#22c55e;
+}
+
+.wrong{
+    color:#ef4444;
+}
+
+.pending{
+    color:#71717a;
+}
+
+textarea{
+    width:100%;
+    height:150px;
+    font-size:20px;
+    padding:15px;
+    border-radius:10px;
+    border:none;
+    outline:none;
+}
+
+.info{
+    display:flex;
+    justify-content:space-between;
+    margin-top:15px;
+    font-size:20px;
+}
+</style>
+</head>
+<body>
+
+<!-- MENU -->
+<div id="menu" class="screen active">
+    <h1>⌨️ Typing Challenge</h1>
+
+    <button onclick="startGame()">PLAY</button>
+    <button onclick="openOption()">OPTION</button>
+    <button onclick="showHighScore()">HIGH SCORE</button>
+</div>
+
+<!-- GAME -->
+<div id="game" class="screen">
+
+    <h1>Typing Challenge</h1>
+
+    <div id="sentence"></div>
+
+    <textarea
+        id="input"
+        placeholder="Ketik kalimat di sini lalu tekan ENTER jika selesai..."
+    ></textarea>
+
+    <div class="info">
+        <span>⏱ Time: <span id="time">60</span>s</span>
+        <span>🏆 High Score: <span id="highscoreLabel">0</span></span>
+    </div>
+
+    <button onclick="backMenu()">MENU</button>
+
+</div>
+
+<!-- OPTION -->
+<div id="option" class="screen">
+    <h1>Option</h1>
+
+    <button onclick="toggleVolume()">
+        Volume :
+        <span id="volumeText">ON</span>
+    </button>
+
+    <br>
+
+    <button onclick="showScreen('menu')">
+        BACK
+    </button>
+</div>
+
+<!-- HIGH SCORE -->
+<div id="highscore" class="screen">
+
+    <h1>🏆 High Score</h1>
+
+    <h2 id="highscoreValue">0</h2>
+
+    <button onclick="showScreen('menu')">
+        BACK
+    </button>
+
+</div>
+
+<script>
+
+const sentences = [
+
+"Belajar pemrograman membutuhkan kesabaran dan latihan yang konsisten setiap hari.",
+
+"Teknologi modern telah mengubah cara manusia berkomunikasi dan bekerja di seluruh dunia.",
+
+"Kesuksesan tidak datang secara instan tetapi melalui proses panjang yang penuh perjuangan.",
+
+"The quick brown fox jumps over the lazy dog while the sun shines brightly in the sky.",
+
+"Artificial intelligence is changing the future of education business and technology.",
+
+"Practice makes perfect and every mistake is an opportunity to learn something new.",
+
+"Reading books regularly can improve knowledge vocabulary and critical thinking skills."
+
+];
+
+let currentSentence = "";
+let timer;
+let timeLeft = 60;
+let volume = true;
+
+const sentenceDiv = document.getElementById("sentence");
+const input = document.getElementById("input");
+
+function showScreen(id){
+
+    document.querySelectorAll(".screen")
+    .forEach(el=>el.classList.remove("active"));
+
+    document.getElementById(id)
+    .classList.add("active");
+}
+
+function startGame(){
+
+    showScreen("game");
+
+    currentSentence =
+    sentences[Math.floor(Math.random()*sentences.length)];
+
+    input.value = "";
+
+    renderSentence("");
+
+    timeLeft = 60;
+
+    document.getElementById("time").textContent = timeLeft;
+
+    document.getElementById("highscoreLabel").textContent =
+    localStorage.getItem("typingHighScore") || 0;
+
+    clearInterval(timer);
+
+    timer = setInterval(()=>{
+
+        timeLeft--;
+
+        document.getElementById("time").textContent = timeLeft;
+
+        if(timeLeft <= 0){
+
+            clearInterval(timer);
+
+            alert("💀 GAME OVER!\nWaktu habis.");
+
+            backMenu();
+        }
+
+    },1000);
+
+    input.focus();
+}
+
+function renderSentence(userText){
+
+    let html = "";
+
+    for(let i=0;i<currentSentence.length;i++){
+
+        const char = currentSentence[i];
+
+        if(i < userText.length){
+
+            if(userText[i] === char){
+                html += `<span class="correct">${char}</span>`;
+            }else{
+                html += `<span class="wrong">${char}</span>`;
+            }
+
+        }else{
+            html += `<span class="pending">${char}</span>`;
+        }
+    }
+
+    sentenceDiv.innerHTML = html;
+}
+
+input.addEventListener("input",()=>{
+
+    renderSentence(input.value);
+
+});
+
+input.addEventListener("keydown",(e)=>{
+
+    if(e.key === "Enter"){
+
+        e.preventDefault();
+
+        if(input.value.trim() === currentSentence){
+
+            clearInterval(timer);
+
+            const score = timeLeft;
+
+            const high =
+            Number(localStorage.getItem("typingHighScore") || 0);
+
+            if(score > high){
+                localStorage.setItem("typingHighScore", score);
+            }
+
+            alert(
+                "🎉 YOU WIN!\n\n" +
+                "Sisa waktu: " + timeLeft + " detik"
+            );
+
+            backMenu();
+        }
+    }
+});
+
+function backMenu(){
+
+    clearInterval(timer);
+
+    showScreen("menu");
+}
+
+function openOption(){
+
+    showScreen("option");
+}
+
+function toggleVolume(){
+
+    volume = !volume;
+
+    document.getElementById("volumeText").textContent =
+    volume ? "ON" : "OFF";
+}
+
+function showHighScore(){
+
+    document.getElementById("highscoreValue").textContent =
+    localStorage.getItem("typingHighScore") || 0;
+
+    showScreen("highscore");
+}
+
+</script>
+
+</body>
+</html>
