@@ -95,6 +95,7 @@ textarea{
 <!-- MENU -->
 <div id="menu" class="screen active">
     <h1>⌨️ Typing Challenge</h1>
+    <h3>by "N"</h3>
 
     <button onclick="startGame()">PLAY</button>
     <button onclick="openOption()">OPTION</button>
@@ -199,7 +200,7 @@ function startGame(){
 
     renderSentence("");
 
-    timeLeft = 60;
+    timeLeft = 25;
 
     document.getElementById("time").textContent = timeLeft;
 
@@ -218,7 +219,7 @@ function startGame(){
 
             clearInterval(timer);
 
-            alert("💀 GAME OVER!\nWaktu habis.");
+            alert("💀 GAME OVER!\nSenen kamis banget ketik nya");
 
             backMenu();
         }
